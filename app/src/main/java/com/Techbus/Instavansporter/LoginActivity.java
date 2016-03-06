@@ -2,6 +2,7 @@ package com.Techbus.Instavansporter;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -11,6 +12,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import butterknife.ButterKnife;
 import butterknife.Bind;
@@ -28,12 +39,18 @@ public class LoginActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        StrictMode.ThreadPolicy policy =
+                new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
         ButterKnife.bind(this);
         
         _loginButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
+
+               // Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                //startActivity(intent);
                 login();
             }
         });
@@ -113,11 +130,11 @@ public class LoginActivity extends AppCompatActivity {
 
     public boolean validate() {
         boolean valid = true;
-
-        String email = _emailText.getText().toString();
+        String foutput="";
+        String portId = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
 
-        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (portId.isEmpty() || portId.length() < 4) {
             _emailText.setError("enter a valid email address");
             valid = false;
         } else {
@@ -129,6 +146,58 @@ public class LoginActivity extends AppCompatActivity {
             valid = false;
         } else {
             _passwordText.setError(null);
+        }
+
+        try {
+
+            String tempUrl="http://192.168.6.165:1215/api/validate/"+portId+"/"+password;
+
+            URL url = new URL(tempUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/json");
+
+            if (conn.getResponseCode() != 200) {
+                throw new RuntimeException("Failed : HTTP error code : "
+                        + conn.getResponseCode());
+            }
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    (conn.getInputStream())));
+
+            String output;
+
+            System.out.println("Output from Server .... \n");
+            while ((output = br.readLine()) != null) {
+                System.out.println(output);
+                foutput=foutput+output;
+            }
+
+            conn.disconnect();
+
+        } catch (MalformedURLException e) {
+
+            e.printStackTrace();
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        }
+
+        try {
+            JSONObject reader = new JSONObject(foutput);
+            String status = reader.getString("status");
+            if (status.equals("000"))
+            {
+                return !valid;
+            }
+            else
+            {
+                valid=false;//change here
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
 
         return valid;

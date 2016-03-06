@@ -10,6 +10,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import butterknife.ButterKnife;
 import butterknife.Bind;
 
@@ -66,6 +76,7 @@ public class SignupActivity extends AppCompatActivity {
 
         // TODO: Implement your own signup logic here.
 
+
         new android.os.Handler().postDelayed(
                 new Runnable() {
                     public void run() {
@@ -113,6 +124,61 @@ public class SignupActivity extends AppCompatActivity {
         } else {
             _passwordText.setError(null);
         }
+
+        /////////////////////////////////////
+       /* try {
+
+            String tempUrl="http://192.168.6.165:1215/api/validate/"+portId+"/"+password;
+
+            URL url = new URL(tempUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/json");
+
+            if (conn.getResponseCode() != 200) {
+                throw new RuntimeException("Failed : HTTP error code : "
+                        + conn.getResponseCode());
+            }
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    (conn.getInputStream())));
+
+            String output;
+
+            System.out.println("Output from Server .... \n");
+            while ((output = br.readLine()) != null) {
+                System.out.println(output);
+                foutput=foutput+output;
+            }
+
+            conn.disconnect();
+
+        } catch (MalformedURLException e) {
+
+            e.printStackTrace();
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        }
+
+        try {
+            JSONObject reader = new JSONObject(foutput);
+            String status = reader.getString("status");
+            if (status.equals("000"))
+            {
+                return valid;
+            }
+            else
+            {
+                valid=false;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+*/
+        ///////////////////////////////////////
 
         return valid;
     }
