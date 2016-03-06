@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -129,6 +130,7 @@ String foutput="";
             System.out.println("Output from Server .... \n");
             while ((output = br.readLine()) != null) {
                 System.out.println(output);
+
                 foutput=foutput+output;
             }
 
@@ -156,6 +158,30 @@ String foutput="";
             else
             {
                 valid=false;//change here
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            JSONArray jsonArray = new JSONArray(foutput);
+
+            int count = jsonArray.length(); // get totalCount of all jsonObjects
+            for(int i=0 ; i< count; i++){   // iterate through jsonArray
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                JSONObject locationdetails = jsonObject.getJSONObject("locationdetails");
+                JSONObject geometry = locationdetails.getJSONObject("geometry");
+                JSONObject location = geometry.getJSONObject("location");
+                Log.w("lat", location.getString("lat"));
+                //JSONObject jsonObject1 = new JSONObject(foutput);
+                jsonObject.getString("jobID");
+                //jsonObject.getString("locationdetails[0].geometry[0].location[0].lat");
+                Log.w("jobID", jsonObject.getString("jobID"));
+
+                //jsonObject.getString("jobID")
+
+               // System.out.println("jsonObject " + i + ": " + jsonObject.getString("jobID"));
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -203,7 +229,7 @@ String foutput="";
     public boolean onMarkerClick(Marker marker) {
         Log.i("GoogleMapActivity", "onMarkerClick");
         Toast.makeText(getApplicationContext(),
-                "Marker Clicked: " + marker.getTitle(), Toast.LENGTH_LONG)
+                "Job Selected: " + marker.getTitle(), Toast.LENGTH_LONG)
                 .show();
         jobId=marker.getAlpha();
         return false;
